@@ -1,15 +1,19 @@
-export function HangmanWord() {
+type HangmanWordProps = {
+    guessedLetters: string[]
+    wordToGuess: string
+}
 
-    const word = "Steve"
-    const guessedLetters = ["t", "e"]
+
+export function HangmanWord({ guessedLetters, wordToGuess}: HangmanWordProps) {
 
     //letter styling
     return <div style= {{ display: "flex", gap: "0.25em", fontSize: "6rem", fontWeight: "bold", textTransform: "uppercase", fontFamily: "monospace",}} >
 
-        {/* compare each letter using index as key, make visible/hidden */}
-        {word.split("").map((letter, index) => (
+        {/* compare each letter using index as key */}
+        {wordToGuess.split("").map((letter, index) => (
             <span style= {{ borderBottom: "0.1em solid black"}} key={index}>
-                <span style= {{ visibility: guessedLetters.includes(letter) ? "visible" : "hidden", }}>
+                {/* hide letter if not in guess */}
+                <span style= {{ visibility: guessedLetters.includes(letter) ? "visible" : "hidden", }}> 
                 
                 {letter}
                 </span>

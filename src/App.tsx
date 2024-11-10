@@ -1,4 +1,4 @@
-import { useState } from  "react"
+import { useState, useEffect, useCallback } from  "react"
 import { HangmanDrawing } from './HangmanDrawing'
 import { HangmanWord } from './HangmanWord'
 import { Keyboard } from  './Keyboard'
@@ -11,8 +11,43 @@ function App(){
   const [wordToGuess, setWordToGuess] = useState(() =>{
     return words[Math.floor(Math.random() * words.length)] 
   })
-    //add guessed letters to a string
-    const [guessedLetters, setGuessedLetters] = useState<string[]>([])
+
+  //add guessed letters to a string
+  const [guessedLetters, setGuessedLetters] = useState<string[]>([])
+
+  //checks for correct letter
+  const incorrectLetters = guessedLetters.filter(
+    letter => !wordToGuess.includes(letter)
+  )
+
+  //tracks guessed letter, limits repeated misses
+  const addGuessedLetters = useCallback((letter: string) => {
+      if (guessedLetters.includes(letter)) return
+
+      setGuessedLetters(currentLetters => [...currentLetters, letter])
+    }, [guessedLetters]
+  )
+ 
+
+  //allow keyboard input, add and remove event listener  
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const key = e.key
+    
+      if (!key.match(/^[a-z]$/)) return
+
+      //run function if key is a-z
+      e.preventDefault()
+      addGuessedLetters(key)
+    }
+
+    document.addEventListener("keypress", handler)
+
+    return () => {
+      document.removeEventListener("keypress", handler)
+    }
+
+  }, [guessedLetters])
 
   return (
     // style container
@@ -31,10 +66,19 @@ function App(){
         Win
       </div>
 
-      <HangmanDrawing />
-      <HangmanWord />
+      {/* add to drawing if incorrect */}
+      <HangmanDrawing numberOfGuesses={incorrectLetters.length} />
+
+      <HangmanWord guessedLetters={guessedLetters} wordToGuess={wordToGuess} />
+
       <div style= {{ alignSelf: "stretch"}}>
-      <Keyboard />
+        <Keyboard activeLetters={guessedLetters.filter(letter =>
+          wordToGuess.includes(letter)
+        )}
+          inactiveLetters={incorrectLetters}
+          addGuessedLetter={addGuessedLetters}
+          
+          />
       </div>
 
     </div>
